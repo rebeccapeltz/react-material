@@ -5,9 +5,9 @@ import Button from "@mui/material/Button";
 // import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
 
-const Div = styled('div')(({ theme }) => ({
+const Div = styled("div")(({ theme }) => ({
   ...theme.typography.button,
   backgroundColor: theme.palette.background.paper,
   padding: theme.spacing(1),
@@ -26,38 +26,61 @@ const style = {
 };
 
 export default function BasicModal() {
+  const question = "What is one?";
+  const correctAnswer = "1";
+  const errorResponse = "Correct: 1";
+  const correctResponse = "Correct!";
   const [open, setOpen] = React.useState(false);
-  const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);
+
+ 
+  const [formDataAnswer, setFormDataAnswer] = useState("");
+  const [formDataCorrect, setFormDataCorrect] = useState(false);
+  const handleOpen = () => {
+    setOpen(true);
+  };
+  const handleClose = () => {
+    setFormDataAnswer("");
+    setFormDataCorrect(false);
+    setOpen(false);
+  };
+  // form is initially neither valid nor invalid
+  // user must submit before one of they get set
+  const [isFormInvalid, setIsFormInvalid] = useState(false);
+  const [helper, setHelper] = useState("Enter a number");
+
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validate(formData)) {
-      // proceed to submit
-    }
+    setIsFormInvalid(false);
+    validate();
   };
-  const [formData, setFormData] = useState({
-    answer: "",
-  });
-  const [isFormInvalid, setIsFormInvalid] = useState(false);
 
-  const validate = (values) => {
-    debugger;
-    if (values.answer === "1") {
+  // called when formed is submitted
+  const validate = () => {
+    // nothing entered show no helper
+
+    if (formDataAnswer.length === 0) {
+      setHelper("Enter a number");
       setIsFormInvalid(false);
     } else {
-      setIsFormInvalid(true);
+      if (!formDataCorrect) {
+        setHelper(errorResponse);
+        setIsFormInvalid(true);
+      } else {
+        setHelper(correctResponse);
+      }
     }
   };
   function handleFormChange(event) {
-    let data = formData;
-    data[event.target.name] = event.target.value;
-    setFormData(data);
+    setFormDataAnswer(event.target.value);
+    setFormDataCorrect(event.target.value === correctAnswer);
   }
 
   return (
     <div>
       <Button onClick={handleOpen}>Open modal</Button>
       <Modal
+        onBackdropClick="false"
         open={open}
         onClose={handleClose}
         aria-labelledby="modal-modal-title"
@@ -74,28 +97,32 @@ export default function BasicModal() {
         <Box
           component="form"
           sx={style}
-          // sx={{
-          //   "& > :not(style)": { m: 1, width: "25ch" },
-          // }}
-          // noValidate
           autoComplete="off"
         >
-          <Div>{"This div's text looks like that of a button."}</Div>
+          <Div>{question}</Div>
           {/* <Typography variant="body1">What is it</Typography> */}
           <TextField
             id="outlined-basic"
             variant="outlined"
             error={isFormInvalid}
-            helperText={isFormInvalid && "Correct answer: 1"}
+            helperText={helper}
             name="answer"
-            label="What is one?"
             onChange={handleFormChange}
-            defaultValue={formData.answer}
+            defaultValue={formDataAnswer}
+            sx={{ display: "block" }}
           />
-          {/* <TextField id="filled-basic" label="Filled" variant="filled" /> */}
-          {/* <TextField id="standard-basic" label="Standard" variant="standard" /> */}
+      
 
-          <Button onClick={handleSubmit}>Submit</Button>
+          <Button
+            onClick={handleSubmit}
+            sx={{ display: "inline" }}
+            type="submit"
+          >
+            Submit
+          </Button>
+          <Button onClick={handleClose} sx={{ display: "inline" }}>
+            Close
+          </Button>
         </Box>
       </Modal>
     </div>
