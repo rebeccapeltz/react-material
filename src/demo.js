@@ -2,10 +2,18 @@ import * as React from "react";
 import { useState } from "react";
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
-// import Typography from "@mui/material/Typography";
 import Modal from "@mui/material/Modal";
 import TextField from "@mui/material/TextField";
 import { styled } from "@mui/material/styles";
+import Card from "@mui/material/Card";
+import CardContent from "@mui/material/CardContent";
+import CardMedia from "@mui/material/CardMedia";
+import Typography from "@mui/material/Typography";
+
+import { Cloudinary } from "cloudinary-core";
+import "cloudinary-video-player/dist/cld-video-player.min.js";
+import "cloudinary-video-player/dist/cld-video-player.min.css";
+import { useEffect } from "react";
 
 const Div = styled("div")(({ theme }) => ({
   ...theme.typography.button,
@@ -24,30 +32,38 @@ const style = {
   boxShadow: 24,
   p: 4,
 };
+const publicId = "slides-video";
+const cld = new Cloudinary({ cloud_name: "pictures77" });
 
 export default function BasicModal() {
-  const question = "What is one?";
-  const correctAnswer = "1";
-  const errorResponse = "Correct: 1";
-  const correctResponse = "Correct!";
+  // const question = "What is one?";
+  // const correctAnswer = "1";
+  // const errorResponse = "Correct: 1";
+  // const correctResponse = "Correct!";
   const [open, setOpen] = React.useState(false);
+  const [media, setMedia] = React.useState(null);
 
- 
   const [formDataAnswer, setFormDataAnswer] = useState("");
   const [formDataCorrect, setFormDataCorrect] = useState(false);
+  const [question, setQuestion] = useState(""); // What is
+  const [errorResponse, setErrorResponse] = useState(""); // Correct:
+  const [correctResponse, setCorrectResponse] = useState(""); // Correct!
+  const [correctAnswer, setCorrectAnswer] = useState(""); //"1"
+
   const handleOpen = () => {
+    setIsFormInvalid(false);
     setOpen(true);
   };
   const handleClose = () => {
     setFormDataAnswer("");
     setFormDataCorrect(false);
     setOpen(false);
+    media.play();
   };
   // form is initially neither valid nor invalid
   // user must submit before one of they get set
   const [isFormInvalid, setIsFormInvalid] = useState(false);
   const [helper, setHelper] = useState("Enter a number");
-
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -58,7 +74,6 @@ export default function BasicModal() {
   // called when formed is submitted
   const validate = () => {
     // nothing entered show no helper
-
     if (formDataAnswer.length === 0) {
       setHelper("Enter a number");
       setIsFormInvalid(false);
@@ -76,55 +91,102 @@ export default function BasicModal() {
     setFormDataCorrect(event.target.value === correctAnswer);
   }
 
-  return (
-    <div>
-      <Button onClick={handleOpen}>Open modal</Button>
-      <Modal
-        onBackdropClick="false"
-        open={open}
-        onClose={handleClose}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        {/* <Box sx={style}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Text in a modal
-          </Typography>
-          <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            Duis mollis, est non commodo luctus, nisi erat porttitor ligula.
-          </Typography>
-        </Box> */}
-        <Box
-          component="form"
-          sx={style}
-          autoComplete="off"
-        >
-          <Div>{question}</Div>
-          {/* <Typography variant="body1">What is it</Typography> */}
-          <TextField
-            id="outlined-basic"
-            variant="outlined"
-            error={isFormInvalid}
-            helperText={helper}
-            name="answer"
-            onChange={handleFormChange}
-            defaultValue={formDataAnswer}
-            sx={{ display: "block" }}
-          />
-      
+  
+  useEffect(() => {
+    const media = cld.videoPlayer("myvideo", {
+      publicId: publicId,
+      fluid: true,
+      controls: true,
+      preload: "auto",
+      mute: true,
+      playedEventTimes: [3, 7.5, 12, 16.5, 21],
+      transformation: {
+        aspect_ratio: "1.5",
+        width: 400,
+        crop: "fill",
+      },
+      posterOptions: {
+        publicId: "cats-and-dogs",
+        transformation: {
+          aspect_ratio: "1.5",
+          width: 400,
+          crop: "fill",
+        },
+      },
+      autoplay: false,
+    });
+    setMedia(media)
+    media.on("timeplayed", (event) => {
+      if (event.eventData.time === 12) {
+        media.pause();
+        handleOpen();
+        setQuestion("How many kittens?");
+        setCorrectResponse("Correct!");
+        setErrorResponse("Correct answer: 1");
+        setCorrectAnswer("1");
+      } else if (event.eventData.time === 21) {
+        media.pause();
+        handleOpen();
+        setQuestion("How many puppies?");
+        setCorrectResponse("Correct!");
+        setErrorResponse("Correct answer: 2");
+        setCorrectAnswer("2");  
+      } else {
+        // do nothing
+      }
+      // alert('timeplayed: ' + event.eventData.time)
+      console.log(event.eventData.time + " seconds played");
+    });
+  }, []);
 
-          <Button
-            onClick={handleSubmit}
-            sx={{ display: "inline" }}
-            type="submit"
-          >
-            Submit
-          </Button>
-          <Button onClick={handleClose} sx={{ display: "inline" }}>
-            Close
-          </Button>
-        </Box>
-      </Modal>
-    </div>
+  return (
+    <Card sx={{ maxWidth: "md" }}>
+      <CardContent sx={{ maxWidth: "md" }}>
+        <Typography component="div" variant="h5">
+          Video
+        </Typography>
+
+        <Modal
+          onBackdropClick="false"
+          open={open}
+          onOpen={handleOpen}
+          onClose={(handleClose)}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box component="form" sx={style} autoComplete="off">
+            <Div>{question}</Div>
+            <Typography variant="body1">What is it</Typography>
+            <TextField
+              id="outlined-basic"
+              variant="outlined"
+              error={isFormInvalid}
+              helperText={helper}
+              name="answer"
+              onChange={handleFormChange}
+              defaultValue={formDataAnswer}
+              sx={{ display: "block" }}
+            />
+
+            <Button
+              onClick={handleSubmit}
+              sx={{ display: "inline" }}
+              type="submit"
+            >
+              Submit
+            </Button>
+            <Button onClick={handleClose} sx={{ display: "inline" }}>
+              Close
+            </Button>
+          </Box>
+        </Modal>
+      </CardContent>
+      <CardMedia
+        component="video"
+        sx={{ maxWidth: "md" }}
+        class="cld-video-player cld-flui"
+        id="myvideo"
+      />
+    </Card>
   );
 }
