@@ -49,6 +49,21 @@ export default function BasicModal() {
   const [errorResponse, setErrorResponse] = useState(""); // Correct:
   const [correctResponse, setCorrectResponse] = useState(""); // Correct!
   const [correctAnswer, setCorrectAnswer] = useState(""); //"1"
+  // form is initially neither valid nor invalid
+  // user must submit before one of they get set
+  const [isFormInvalid, setIsFormInvalid] = useState(false);
+  const [helper, setHelper] = useState("Enter a number");
+
+  const initState = () => {
+    setOpen(false);
+    setMedia(null);
+    setQuestion("");
+    setErrorResponse("");
+    setCorrectResponse("");
+    setCorrectAnswer("");
+    setIsFormInvalid(false);
+    setHelper("Enter a number");
+  };
 
   const handleOpen = () => {
     setIsFormInvalid(false);
@@ -60,10 +75,6 @@ export default function BasicModal() {
     setOpen(false);
     media.play();
   };
-  // form is initially neither valid nor invalid
-  // user must submit before one of they get set
-  const [isFormInvalid, setIsFormInvalid] = useState(false);
-  const [helper, setHelper] = useState("Enter a number");
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -91,14 +102,15 @@ export default function BasicModal() {
     setFormDataCorrect(event.target.value === correctAnswer);
   }
 
-  
   useEffect(() => {
     const media = cld.videoPlayer("myvideo", {
       publicId: publicId,
       fluid: true,
-      controls: true,
+      controls: false,
+      autoplay: false,
       preload: "auto",
       mute: true,
+      bigPlayButton: false,
       playedEventTimes: [3, 7.5, 12, 16.5, 21],
       transformation: {
         aspect_ratio: "1.5",
@@ -113,9 +125,17 @@ export default function BasicModal() {
           crop: "fill",
         },
       },
-      autoplay: false,
     });
-    setMedia(media)
+    setMedia(media);
+    media.on("ended", (event) => {
+    //   .video-js .vjs-big-play-button {
+    //     display: none;
+    // }
+    // .video-js .vjs-control-bar {
+    //     display: flex;
+    // }
+      initState();
+    });
     media.on("timeplayed", (event) => {
       if (event.eventData.time === 12) {
         media.pause();
@@ -130,7 +150,7 @@ export default function BasicModal() {
         setQuestion("How many puppies?");
         setCorrectResponse("Correct!");
         setErrorResponse("Correct answer: 2");
-        setCorrectAnswer("2");  
+        setCorrectAnswer("2");
       } else {
         // do nothing
       }
@@ -139,24 +159,29 @@ export default function BasicModal() {
     });
   }, []);
 
+  const playVideo = () => {
+    media.play();
+    //disable button
+  };
   return (
     <Card sx={{ maxWidth: "md" }}>
       <CardContent sx={{ maxWidth: "md" }}>
         <Typography component="div" variant="h5">
           Video
         </Typography>
-
+        <Button onClick={playVideo} sx={{ display: "inline" }}>
+          Play Video
+        </Button>
         <Modal
           onBackdropClick="false"
           open={open}
           onOpen={handleOpen}
-          onClose={(handleClose)}
+          onClose={handleClose}
           aria-labelledby="modal-modal-title"
           aria-describedby="modal-modal-description"
         >
           <Box component="form" sx={style} autoComplete="off">
             <Div>{question}</Div>
-            <Typography variant="body1">What is it</Typography>
             <TextField
               id="outlined-basic"
               variant="outlined"

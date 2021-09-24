@@ -70,3 +70,15 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
 
 ```JavaScript
+ // controlBar: {
+      //   playToggle: false,
+      //   captionsButton: false,
+      //   chaptersButton: false,
+      //   subtitlesButton: false,
+      //   remainingTimeDisplay: false,
+      //   progressControl: {
+      //     seekBar: true,
+      //   },
+        fullscreenToggle: false,
+        playbackRateMenuButton: false,
+      },
