@@ -4,11 +4,10 @@
     <meta charset="utf-8" />
     <title>Create Video</title>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="stylesheet" href="style.css" />
   </head>
 
   <body>
-    <button onclick="">Click to post to netlify</button>
+    <button onclick="test()">Click to post to netlify</button>
     <div id="warning"></div>
     <div id="result"></div>
     <script>
@@ -45,24 +44,35 @@
       const options = {
         method: "POST",
         headers: { "Content-Type": "application/json; charset=utf-8" },
-        body: JSON.stringify({ manifest: manifest }),
+        body: JSON.stringify({ public_id: "testvc", manifest: manifest }),
       };
 
-      fetch("/.netlify/functions/create-video", options)
-        .then((res) => res.json())
-        .then(async (res) => {
-          if (!res.manifest)
-            return (document.getElementById("warning").innerHTML =
-              "Error capturing screenshot");
-          else {
-            console.log(res.manifest);
-            document.getElementById("result").innerHTML = JSON.stringify(res.manifest,0,2);
-          }
-        })
-        .catch((err) => {
-          console.log(err);
-          document.getElementById("result").textContent = `${err.toString()}`;
-        });
+  
+      const test = () => {
+        fetch(
+          "https://awesome-goodall-3c71bf.netlify.app/.netlify/functions/create-video/.netlify/functions/create-video",
+          options
+        )
+          .then((res) => res.json())
+          .then(async (res) => {
+            if (!res.manifest)
+              return (document.getElementById("warning").innerHTML =
+                "Error capturing screenshot");
+            else {
+              console.log(res.manifest);
+              document.getElementById("result").innerHTML = JSON.stringify(
+                res.manifest,
+                0,
+                2
+              );
+            }
+          })
+          .catch((err) => {
+            console.log(err);
+            document.getElementById("result").textContent = `${err.toString()}`;
+          });
+      };
+  
     </script>
   </body>
 </html>
